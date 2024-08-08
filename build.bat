@@ -5,4 +5,4 @@ IF not exist .\.build (
     mkdir .\.build
 ) else ( echo "Build directory found!" ) 
 
-gcc main.c -o .\.build\Hexcell
+gcc main.c -o .\.build\Hexcell -I include/ -L lib/ -lraylib -lopengl32 -lgdi32 -lwinmm

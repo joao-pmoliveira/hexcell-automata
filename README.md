@@ -4,13 +4,17 @@ Hexagonal cells influence mainly how and which neighboring cells are taken into 
 
 ## How to run
 
-Compile the `main.c` file:
+To compile and run the program run:
 
-    gcc -o .\.build\Hexcell .\main.c
+    build.bat
+    run.bat
 
-This will create an executable in the `.build` directory.
+or simply:
 
-Run the executable:
+    build && run
 
-    .build\Hexcell.exe
 
+## Dependencies
+
+For the visualization of the cellular automata in action, this program uses `raylib`.
+Link to library [here](raylib.com).

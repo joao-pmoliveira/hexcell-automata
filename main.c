@@ -1,49 +1,51 @@
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <Windows.h>
+#include "include/raylib.h"
 
+#define IVORY       (Color) {246, 247, 235, 255}
+#define ONYX        (Color) {57, 62, 65, 255}
 
 int main(void)
 {
-    const int ROWS = 10;
-    const int COLUMNS = 10;
+    const int SCREEN_WIDTH = 640;
+    const int SCREEN_HEIGHT = 360;
+    const int CELL_SIZE = 16;
+    const int ROWS = SCREEN_WIDTH / CELL_SIZE;
+    const int COLUMNS = SCREEN_HEIGHT / CELL_SIZE;
     const int MAX_VALUE = 1;
 
-    int cells[ROWS][COLUMNS];
-    memset(cells, 0, sizeof cells);
+    int cells[COLUMNS][ROWS];
+    int state[COLUMNS][ROWS];
 
-    int state[ROWS][COLUMNS];
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hexcell Automata");
+    SetTargetFPS(5);
 
-
-    // Initial state
-
+    // set initial state
     for (int c = 0; c < COLUMNS; c++) {
         for (int r = 0; r < ROWS; r++) {
             cells[c][r] = rand() % (MAX_VALUE + 1);
         }
     }
 
-    while(1) {
-        // save current cells' state
-
+    while (!WindowShouldClose()) {
+        
+        // save current state
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
                 state[c][r] = cells[c][r];
             }
         }
 
-        // Calculate new cell state
+        // calculate new state
 
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
-                int n = 0;
+                // CONWAY'S RULES
+                // Alive & n<2 -> cell dies
+                // Alive & (n=2 | n=3) -> cell lives
+                // Alive & n>3 -> cell dies
+                // Dead & n=3 -> new alive cell
 
-                // Conway rules
-                // alive & n<2 = dies
-                // alive & (n=2 || n=3) = lives
-                // alive & n>3 = dies
-                // dead & n=3 = born 
+                int n = 0;
 
                 if (c-1 >= 0) {
                     n += state[c-1][r];
@@ -62,31 +64,36 @@ int main(void)
                 if (r-1 >= 0) n += state[c][r-1];
                 if (r+1 < ROWS) n += state[c][r+1];
 
-
-                /* is alive */
                 if (state[c][r]) {
-                    if (n<2 || n>3) cells[c][r] = 0;
+                    if (n < 2 || n > 3) cells[c][r] = 0;
                     if (n == 2 || n == 3) cells[c][r] = 1;
-                } else if (n == 3) cells[c][r] = 1;
-
+                } else if (n == 3) cells [c][r] = 1;
             }
         }
 
-        // Display
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        // draw cells
         for (int c = 0; c < COLUMNS; c++) {
             for (int r = 0; r < ROWS; r++) {
+                int x = r * CELL_SIZE;
+                int y = c * CELL_SIZE;
+
                 if (cells[c][r]) {
-                    printf("%s", "|0");
+                    DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, ONYX);
                 } else {
-                    printf("%s", "| ");
+                    DrawRectangle(x, y, CELL_SIZE, CELL_SIZE, IVORY);
                 }
+
+                DrawRectangleLines(x, y, CELL_SIZE, CELL_SIZE, IVORY);
+
             }
-            printf("|\n");
         }
 
-        Sleep(500);
-        system("cls");
+        EndDrawing();
     }
+    CloseWindow();
 
     return 0;
 }
