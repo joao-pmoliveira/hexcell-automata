@@ -3,9 +3,30 @@
 #include "include/raylib.h"
 #include "include/raymath.h"
 
+
 #define IVORY       (Color) {246, 247, 235, 255}
 #define ONYX        (Color) {57, 62, 65, 255}
 #define CPINK       (Color) {255, 175, 204, 255}
+#define SORANGE     (Color) {227, 100, 20, 255}
+#define CARMINE     (Color) {154, 3, 30, 255}
+
+static bool use_accent_color = false;
+static int palette_index = 1;
+//Palettes from Lospect
+static const Color palettes[][3] = {
+    //Dream-Based Videogame
+    { {250,230,205,255}, {151,155,199,255}, {243,192,206,255}, },
+    //Bumblebit
+    { {39,41,70,255}, {237,160,49,255}, {231,255,238,255}, },
+    //1Bit-Styx
+    { {44,44,42,255}, {255,243,243,255}, {160,124,255,255}, },
+    //Mystique 3
+    { {80,42,69,255}, {129,110,160,255}, {135,186,197,255}, },
+    //Sangria
+    { {33,6,19,255}, {246,48,144,255}, {255,255,245,255}, },
+    //Cold Light
+    { {8,0,31,255}, {68,77,132,255}, {178,213,209,255}, },
+};
 
 typedef struct Cell {
     bool alive;
@@ -40,6 +61,8 @@ int main(void)
             }
         }
     }
+    
+    int palette_timer = 0;
 
     while (!WindowShouldClose()) {
         // save current state
@@ -100,8 +123,13 @@ int main(void)
             }
         }
 
+
         BeginDrawing();
-        ClearBackground(BLUE);
+        Color background_color = palettes[palette_index][0];
+        Color decaying_color = palettes[palette_index][1];
+        Color accent_color = use_accent_color ? palettes[palette_index][2] : decaying_color;
+
+        ClearBackground(background_color);
 
 
         // draw cells
@@ -114,20 +142,26 @@ int main(void)
                     // draw alive cell
                     DrawRectangle(x, y,
                                   CELL_SIZE, CELL_SIZE,
-                                  (Color){246, 247, 235, Remap(cells[row][col].health, MIN_HEALTH, MAX_HEALTH, 0, 255)});
+                                  accent_color);
                 } else {
                     // draw empty cell
+                    int alpha = Remap(cells[row][col].health, MIN_HEALTH, MAX_HEALTH, 0, 255);
                     DrawRectangle(x, y,
                                   CELL_SIZE, CELL_SIZE,
-                                  (Color){246, 247, 235, Remap(cells[row][col].health, MIN_HEALTH, MAX_HEALTH, 0, 255)});
+                                  (Color){decaying_color.r, decaying_color.g, decaying_color.b, alpha});
                 }
 
-                // draw dividers
-                // DrawRectangleLines(x, y, CELL_SIZE, CELL_SIZE, BLUE);
             }
         }
 
-        DrawFPS(0, SCREEN_HEIGHT - 32);
+        palette_timer += 1;
+        if (palette_timer > (30 * 3)) {
+            int palettes_count = sizeof(palettes) / sizeof(palettes[0]);
+            palette_index++;
+            palette_index = palette_index % palettes_count;
+            palette_timer = 0;
+        }
+
         EndDrawing();
     }
     CloseWindow();
